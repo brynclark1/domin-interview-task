@@ -1,6 +1,6 @@
 # domin-interview-task
 
-This is a simple data ingester application built with FastAPI for the backend and ReactJS for the frontend.
+This is a simple data handler application built with FastAPI for the backend and ReactJS for the frontend.
 
 ## Installation
 
@@ -23,8 +23,11 @@ This is a simple data ingester application built with FastAPI for the backend an
 4. **Install Axios for ReactJS and Run the Web App**:
 
    ```bash
-   cd real-time-data-app
+   cd frontend
    npm install axios
    npm start
+
+
+You can view the real-time data and make filtering queries at http://localhost:3000/data
 
 

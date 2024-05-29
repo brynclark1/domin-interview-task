@@ -1,12 +1,11 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 import pandas as pd
+import threading
 import time
 
 app = FastAPI()
 
-# Enable CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Allows all origins
@@ -15,20 +14,39 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
-# Load CSV data, skipping the second row (index 1) which contains units
-df = pd.read_csv("sample_vehicle_data_6kph.csv", skiprows=[1])
+# Buffer to store CSV data
+buffer = {
+    "data": [],
+    "timestamps": 0
+}
+buffer_refresh_interval = 60  # Refresh buffer every 60 seconds
+csv_file = 'sample_vehicle_data_6kph.csv'
 
-class DataItem(BaseModel):
-    timestamps: float  # Treat timestamp as float
-    latitude: float
-    longitude: float
-    spd_over_grnd: float  # Renamed speed over ground to spd_over_grnd
+def refresh_buffer():
+    while True:
+        df = pd.read_csv(csv_file, skiprows=[1])
+        buffer["data"] = df.to_dict(orient="records")
+        buffer["timestamps"] = time.time()
+        time.sleep(buffer_refresh_interval)
 
-@app.get("/data", response_model=list[DataItem])
-def get_data():
-    # Add timestamp to each row of data
-    data_with_timestamp = df.to_dict(orient="records")
-    return data_with_timestamp
+# Start a thread to refresh the buffer periodically
+threading.Thread(target=refresh_buffer, daemon=True).start()
+
+@app.get("/data")
+async def get_data():
+    return buffer["data"]
+
+@app.get("/data-range")
+async def get_data_range(
+    start_time: float = Query(..., description="Start time in seconds"),
+    end_time: float = Query(..., description="End time in seconds")
+):
+    if start_time > end_time:
+        raise HTTPException(status_code=400, detail="start_time must be less than end_time")
+
+    # Filter data within the specified time range
+    filtered_data = [item for item in buffer["data"] if start_time <= item["timestamps"] <= end_time]
+    return filtered_data
 
 if __name__ == "__main__":
     import uvicorn
