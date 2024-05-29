@@ -4,7 +4,7 @@ import axios from 'axios';
 function App() {
   const [data, setData] = useState([]);
   const [startTime, setStartTime] = useState(0);
-  const [endTime, setEndTime] = useState(Date.now() / 1000); // Default to current time
+  const [endTime, setEndTime] = useState(Date.now() / 1000);
 
   useEffect(() => {
     const fetchData = async () => {
