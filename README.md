@@ -7,8 +7,7 @@ This is a simple data ingester application built with FastAPI for the backend an
 1. **Clone the repository**:
 
    ```bash
-   git clone https://github.com/your-username/data-ingester.git
-   cd data-ingester
+   git clone https://github.com/brynclark1/domin-interview-task.git
 
 2. **Install pip requirements**:
 
